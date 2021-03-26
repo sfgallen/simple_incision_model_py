@@ -11,11 +11,11 @@ Date modified: 03/26/2021
 Contact: sean.gallen[at]colostate.edu
 """
 
+# load in relevant objects
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 import spim_ftfd as spm
-
 
 # model run time and plotting info
 run_time = 0.25e6
@@ -34,7 +34,6 @@ h = 1.7
 A = ka*L**h
 
 # define the uplift rates and stream power parameters
-
 Ui = 0.5e-3 # initial uplift rate
 Uf = 1e-3   # final uplift rate
 
@@ -86,7 +85,6 @@ ax2.set_ylabel('Slope')
 ax2.set_xscale('log')
 ax2.set_yscale('log')
 
-
 ax3 = plt.subplot(2,2,3)
 ax3.plot(L/1000,E*1000,'k-')
 ax3.set_xlabel('Distance (km)')
@@ -103,13 +101,9 @@ Ef = Kf*A**m*Sf**n
 
 # plot the initial conditions
 ax1.plot(L/1000,Zf,'r-')
-
 ax2.plot(A,Sf,'r-')
-
 ax3.plot(L/1000,Ef*1000,'r-')
-
 ax4.plot(chi,Zf,'r-')
-
 
 ## prepare for the forloop
 # time loop prep
@@ -153,22 +147,15 @@ for t in range(t_steps):
     # plot the results when needed
     if np.remainder(t,t_plots) == 0:
         ax1.plot(L/1000,Z,'b-',linewidth = 0.5)
-
         ax2.plot(A,S,'b-',linewidth = 0.5)
-
         ax3.plot(L/1000,E*1000,'b-',linewidth = 0.5)
-
         ax4.plot(chi,Z,'b-',linewidth = 0.5)
         
     # update the waitbar
     pbar.update(n=1)
 
-
-
+# plot the final numerical solution in the model
 ax1.plot(L/1000,Z,'g--',linewidth = 2)
-
 ax2.plot(A,S,'g--',linewidth = 2)
-
 ax3.plot(L/1000,E*1000,'g--',linewidth = 2)
-
 ax4.plot(chi,Z,'g--',linewidth = 2)
