@@ -11,14 +11,14 @@ Date modified: 03/26/2021
 Contact: sean.gallen[at]colostate.edu
 """
 
-# load in relevant objects
+# Add in relevant tools
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 import spim_ftfd as spm
 
 # model run time and plotting info
-run_time = 0.25e6
+run_time = 0.4e6
 stabil = 3
 n_plots = 6
 
@@ -34,7 +34,7 @@ h = 1.7
 A = ka*L**h
 
 # define the uplift rates and stream power parameters
-Ui = 0.5e-3 # initial uplift rate
+Ui = 5e-4   # initial uplift rate
 Uf = 1e-3   # final uplift rate
 
 Ki = 1e-5   # initial erodibility
@@ -66,40 +66,56 @@ chi = np.flipud(chi)
 vi = dx/(Ki*A**m*S**(n-1))
 vf = dx/(Kf*A**m*S**(n-1))
 vel = np.concatenate((vi,vf))
-dt = min(vel)
+dt = min(vel)/stabil
 
 ## plot the initial and final conditions
 # calculate initial erosion rate
 E = Ki*A**m*S**n
 
-# plot the initial conditions
+# change figure size
+plt.figure(figsize = (10,5))
+
+## plot the initial conditions
+# profile
 ax1 = plt.subplot(2,2,1)
 ax1.plot(L/1000,Z,'k-')
 ax1.set_xlabel('Distance (km)')
 ax1.set_ylabel('Elevation (m)')
+ax1.tick_params(direction='in')
+plt.tight_layout()
 
+# slope-area
 ax2 = plt.subplot(2,2,2)
 ax2.plot(A,S,'k-')
 ax2.set_xlabel('Drainage area (m^2)')
 ax2.set_ylabel('Slope')
 ax2.set_xscale('log')
 ax2.set_yscale('log')
+ax2.xaxis.set_tick_params(direction='in', which='both')
+ax2.yaxis.set_tick_params(direction='in', which='both')
+plt.tight_layout()
 
+# erosion along the profile
 ax3 = plt.subplot(2,2,3)
 ax3.plot(L/1000,E*1000,'k-')
 ax3.set_xlabel('Distance (km)')
 ax3.set_ylabel('Erosion rate (mm/yr)')
+ax3.tick_params(direction='in')
+plt.tight_layout()
 
+# chi-plot
 ax4 = plt.subplot(2,2,4)
 ax4.plot(chi,Z,'k-')
 ax4.set_xlabel('$\chi$')
 ax4.set_ylabel('Elevation (m)')
+ax4.tick_params(direction='in')
 ax4.invert_xaxis()
+plt.tight_layout()
 
 # calculate final erosion rate
 Ef = Kf*A**m*Sf**n
 
-# plot the initial conditions
+# plot the final steady-state conditions
 ax1.plot(L/1000,Zf,'r-')
 ax2.plot(A,Sf,'r-')
 ax3.plot(L/1000,Ef*1000,'r-')
@@ -112,7 +128,7 @@ t_plots = int(np.floor(t_steps/n_plots))
 
 # allocate memory to tack time varying variables
 E_mean = np.empty([t_steps,1])
-Z_mean = E_mean
+Z_mean = np.empty([t_steps,1])
 mod_time = np.zeros([t_steps,1])
 
 E_mean[0] = np.mean(E)
@@ -154,8 +170,27 @@ for t in range(t_steps):
     # update the waitbar
     pbar.update(n=1)
 
-# plot the final numerical solution in the model
+# plot the final solution from the model run
 ax1.plot(L/1000,Z,'g--',linewidth = 2)
 ax2.plot(A,S,'g--',linewidth = 2)
 ax3.plot(L/1000,E*1000,'g--',linewidth = 2)
 ax4.plot(chi,Z,'g--',linewidth = 2)
+
+# on a new figure plot the mean E and mean Z through time
+plt.figure(figsize = (8,4))
+
+ax1 = plt.subplot(1,2,1)
+ax1.plot(mod_time/1e6,E_mean*1000,'g-')
+ax1.set_xlabel('Time (Myr')
+ax1.set_ylabel('Erosion rate (mm/yr)')
+ax1.tick_params(direction='in')
+plt.tight_layout()
+ax1.set_title('Mean erosion rate history')
+
+ax2 = plt.subplot(1,2,2)
+ax2.plot(mod_time/1e6,Z_mean,'g-')
+ax2.set_xlabel('Time (Myr')
+ax2.set_ylabel('Mean elevation (m)')
+ax2.tick_params(direction='in')
+plt.tight_layout()
+ax2.set_title('Mean elevation history')
