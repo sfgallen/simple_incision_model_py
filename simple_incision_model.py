@@ -18,8 +18,8 @@ import spim_ftfd as spm
 
 
 # model run time and plotting info
-run_time = 7e5
-stabil = 1
+run_time = 0.25e6
+stabil = 3
 n_plots = 6
 
 # define the domain
@@ -35,7 +35,7 @@ A = ka*L**h
 
 # define the uplift rates and stream power parameters
 
-Ui = 1e-4   # initial uplift rate
+Ui = 0.5e-3 # initial uplift rate
 Uf = 1e-3   # final uplift rate
 
 Ki = 1e-5   # initial erodibility
