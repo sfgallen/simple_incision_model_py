@@ -7,7 +7,7 @@ script calls spim_ftfd.py, which contains to functions for specific
 calculations
 
 Author: Sean F. Gallen
-Date modified: 03/26/2021
+Date modified: 03/29/2021
 Contact: sean.gallen[at]colostate.edu
 """
 
@@ -18,24 +18,24 @@ from tqdm import tqdm
 import spim_ftfd as spm
 
 # model run time and plotting info
-run_time = 0.4e6
-stabil = 3
-n_plots = 6
+run_time = 0.4e6    # model run time (yrs)
+stabil = 3          # increase the number of the model is unstable
+n_plots = 6         # number of transient profiles plotted
 
 # define the domain
-l_crit = 1e3
-l_max = 1e5
-dx = 100
+l_crit = 1e3        # distance from the divide to the channel head (m)
+l_max = 1e5         # maximum distance from the divide (m)
+dx = 100            # size of stream channel nodes (m)
 L = np.arange(l_crit,l_max,dx)
 
 # define hack's constants and drainage area
 ka = 6.7
 h = 1.7
-A = ka*L**h
+A = ka*L**h         # drainage area based on Hack's law (m^2)
 
 # define the uplift rates and stream power parameters
-Ui = 5e-4   # initial uplift rate
-Uf = 1e-3   # final uplift rate
+Ui = 5e-4   # initial uplift rate (m/yr)
+Uf = 1e-3   # final uplift rate (m/yr)
 
 Ki = 1e-5   # initial erodibility
 Kf = 1e-5   # final erodibility
@@ -45,14 +45,15 @@ n = 1.0     # slope exponent
 
 mn = m/n    # concavity
 
-## Calculate the initial steady-state elevtion of the river
+# Calculate the initial steady-state elevtion of the river
 [Z,S,X] = spm.steady_state_profile(Ui,Ki,m,n,A,L)
 
-# calculate chi
+## calculate the transformed distance variable, chi ##
 Achi = A**-mn
 Achi = np.flipud(Achi)
 chi = np.zeros(np.size(Achi))
 
+# integrate to get chi
 for i in range(1,len(chi)):
     dchi = ((Achi[i]+Achi[i-1])/2)*(X[i-1]-X[i])
     chi[i] = chi[i-1] + dchi
@@ -62,20 +63,20 @@ chi = np.flipud(chi)
 # Calculate the finali steady state elevation
 [Zf,Sf,_] = spm.steady_state_profile(Uf,Kf,m,n,A,L)
 
-# CLF criterion to determine stable timestep
+## CLF criterion to determine stable timestep ##
 vi = dx/(Ki*A**m*S**(n-1))
 vf = dx/(Kf*A**m*S**(n-1))
 vel = np.concatenate((vi,vf))
 dt = min(vel)/stabil
 
-## plot the initial and final conditions
+## plot the initial and final conditions ##
 # calculate initial erosion rate
 E = Ki*A**m*S**n
 
 # change figure size
 plt.figure(figsize = (10,5))
 
-## plot the initial conditions
+# plot the initial conditions
 # profile
 ax1 = plt.subplot(2,2,1)
 ax1.plot(L/1000,Z,'k-')
@@ -121,8 +122,8 @@ ax2.plot(A,Sf,'r-')
 ax3.plot(L/1000,Ef*1000,'r-')
 ax4.plot(chi,Zf,'r-')
 
-## prepare for the forloop
-# time loop prep
+## prepare for the forloop ##
+# determine number of timesteps and when to plot transient profiles
 t_steps = int(np.ceil(run_time/dt))
 t_plots = int(np.floor(t_steps/n_plots))
 
@@ -137,7 +138,7 @@ Z_mean[0] = np.mean(Z)
 # set up waitbar
 pbar = tqdm(total=t_steps)
 
-# Initiate the time forloop
+## Initiate and run the time loop ##
 for t in range(t_steps):
     
     # Calculate the erosion rate
@@ -176,9 +177,10 @@ ax2.plot(A,S,'g--',linewidth = 2)
 ax3.plot(L/1000,E*1000,'g--',linewidth = 2)
 ax4.plot(chi,Z,'g--',linewidth = 2)
 
-# on a new figure plot the mean E and mean Z through time
+## on a new figure plot the mean E and mean Z through time ##
 plt.figure(figsize = (8,4))
 
+# mean ersoion rate through time
 ax1 = plt.subplot(1,2,1)
 ax1.plot(mod_time/1e6,E_mean*1000,'g-')
 ax1.set_xlabel('Time (Myr')
@@ -187,6 +189,7 @@ ax1.tick_params(direction='in')
 plt.tight_layout()
 ax1.set_title('Mean erosion rate history')
 
+# mean elevation through time
 ax2 = plt.subplot(1,2,2)
 ax2.plot(mod_time/1e6,Z_mean,'g-')
 ax2.set_xlabel('Time (Myr')

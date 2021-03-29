@@ -1,8 +1,18 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Mar 26 11:23:08 2021
 
-@author: sfgallen
+"""
+Some functions to calculate the steady-state elevation of a river channel and
+the slope of a river channel that are used several times in the script 
+"simple_incision_model_py.py"
+
+for more information on the functions type
+help(spim_ftfd.steady_state_profile)
+help(spim_ftfd.calc_slope)
+into the python command window
+
+Author: Sean F. Gallen
+Date modified: 03/26/2021
+Contact: sean.gallen[at]colostate.edu
+
 """
 
 import numpy as np
