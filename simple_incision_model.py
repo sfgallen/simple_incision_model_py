@@ -127,9 +127,9 @@ t_steps = int(np.ceil(run_time/dt))
 t_plots = int(np.floor(t_steps/n_plots))
 
 # allocate memory to tack time varying variables
-E_mean = np.empty([t_steps,1])
-Z_mean = np.empty([t_steps,1])
-mod_time = np.zeros([t_steps,1])
+E_mean = np.empty([t_steps+1,1])
+Z_mean = np.empty([t_steps+1,1])
+mod_time = np.zeros([t_steps+1,1])
 
 E_mean[0] = np.mean(E)
 Z_mean[0] = np.mean(Z)
@@ -142,8 +142,8 @@ for t in range(t_steps):
     
     # Calculate the erosion rate
     E = Kf*A**m*S**n
-    E_mean[t] = np.mean(E)
-    mod_time[t] = (t)*dt
+    E_mean[t+1] = np.mean(E)
+    mod_time[t+1] = (t)*dt
     
     # evolve the profile
     Z_cur = Z + (Uf*dt) - (E*dt)
@@ -158,7 +158,7 @@ for t in range(t_steps):
     Z = Z_cur
     
     # update Z_mean
-    Z_mean[t] = np.mean(Z)
+    Z_mean[t+1] = np.mean(Z)
     
     # plot the results when needed
     if np.remainder(t,t_plots) == 0:
